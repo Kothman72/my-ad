@@ -42,6 +42,11 @@ input[type="text"] {
   border: 1px solid var(--line); border-radius: 8px;
   background: var(--surface); color: var(--ink); font: inherit;
 }
+select {
+  padding: 12px 10px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--ink); font: inherit;
+}
 button { font: inherit; cursor: pointer; }
 form button {
   padding: 12px 18px; border: 0; border-radius: 8px;
@@ -50,6 +55,16 @@ form button {
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.category-filter {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px;
+}
+.category-filter button {
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--muted);
+}
+.category-filter button.active {
+  border-color: var(--accent); background: var(--accent); color: var(--accent-ink);
+}
 li {
   display: grid; grid-template-columns: auto 1fr auto auto;
   align-items: center; gap: 14px;
@@ -66,6 +81,11 @@ li {
 .name { font-weight: 600; overflow-wrap: anywhere; }
 .done .name { color: var(--muted); text-decoration: line-through; }
 .meta { display: block; font-size: 0.85rem; font-weight: 400; color: var(--muted); text-decoration: none; }
+.category {
+  display: inline-block; margin-top: 6px; padding: 2px 8px;
+  border-radius: 999px; background: var(--line); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; text-decoration: none;
+}
 
 .streak { text-align: right; line-height: 1; }
 .streak strong { display: block; font-size: 2rem; letter-spacing: -0.03em; color: var(--accent); }
@@ -80,3 +100,9 @@ li {
 #empty-state { text-align: center; color: var(--muted); padding: 32px 0; }
 
 @media (prefers-reduced-motion: reduce) { .check { transition: none; } }
+@media (max-width: 560px) {
+  form { flex-wrap: wrap; }
+  input[type="text"] { flex-basis: 100%; }
+  select { flex: 1; }
+  form button { flex: 1; }
+}

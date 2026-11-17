@@ -5,6 +5,8 @@
 
   const form = document.getElementById("habit-form");
   const input = document.getElementById("habit-input");
+  const categorySelect = document.getElementById("habit-category");
+  const categoryFilter = document.getElementById("category-filter");
   const list = document.getElementById("habit-list");
   const emptyState = document.getElementById("empty-state");
   const todayLabel = document.getElementById("today-label");
@@ -39,6 +41,8 @@
   }
 
   let habits = load();
+  let activeCategory = "All";
+  const categories = ["Health", "Work", "Learning", "Personal"];
 
   // ---------- Streak logic ----------
   // Current streak: consecutive days ending today, or yesterday if today
@@ -66,8 +70,8 @@
   }
 
   // ---------- Actions ----------
-  function addHabit(name) {
-    habits.push({ id: Date.now().toString(36), name, completions: [] });
+  function addHabit(name, category) {
+    habits.push({ id: Date.now().toString(36), name, category, completions: [] });
     save();
     render();
   }
@@ -108,7 +112,32 @@
     list.replaceChildren();
     emptyState.hidden = habits.length > 0;
 
-    habits.forEach((habit) => {
+    const usedCategories = [...new Set(habits.map((habit) =>
+      categories.includes(habit.category) ? habit.category : "Personal"
+    ))].sort();
+
+    const filters = ["All", ...usedCategories];
+    if (!filters.includes(activeCategory)) activeCategory = "All";
+    categoryFilter.replaceChildren();
+    filters.forEach((category) => {
+      const button = el("button", activeCategory === category ? "active" : "", category);
+      button.type = "button";
+      button.setAttribute("aria-pressed", String(activeCategory === category));
+      button.addEventListener("click", () => {
+        activeCategory = category;
+        render();
+      });
+      categoryFilter.appendChild(button);
+    });
+
+    const visibleHabits = activeCategory === "All"
+      ? habits
+      : habits.filter((habit) =>
+          (categories.includes(habit.category) ? habit.category : "Personal") === activeCategory
+        );
+
+    emptyState.hidden = visibleHabits.length > 0;
+    visibleHabits.forEach((habit) => {
       const done = habit.completions.includes(today);
       const streak = currentStreak(habit.completions);
 
@@ -122,6 +151,8 @@
 
       const name = el("div", "name", habit.name);
       name.appendChild(el("span", "meta", `Best streak: ${bestStreak(habit.completions)}`));
+      const habitCategory = categories.includes(habit.category) ? habit.category : "Personal";
+      name.appendChild(el("span", "category", habitCategory));
 
       const streakBox = el("div", "streak");
       streakBox.append(el("strong", "", String(streak)), el("span", "", streak === 1 ? "day" : "days"));
@@ -135,8 +166,10 @@
       list.appendChild(li);
     });
 
-    const doneCount = habits.filter((h) => h.completions.includes(today)).length;
-    progress.textContent = habits.length ? `${doneCount} of ${habits.length} done today` : "";
+    const doneCount = visibleHabits.filter((h) => h.completions.includes(today)).length;
+    progress.textContent = visibleHabits.length
+      ? `${doneCount} of ${visibleHabits.length} done today`
+      : "";
   }
 
   // ---------- Events ----------
@@ -144,7 +177,7 @@
     e.preventDefault();
     const name = input.value.trim();
     if (!name) return;
-    addHabit(name);
+    addHabit(name, categorySelect.value);
     input.value = "";
     input.focus();
   });
